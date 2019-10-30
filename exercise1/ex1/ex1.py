@@ -6,8 +6,9 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-mpl.rc('text',usetex=True)
-plt.rc('font',family='serif')
+mpl.rc('text', usetex=True)
+plt.rc('font', family='serif')
+
 
 def checkArgvOk(argv: List[str]) -> bool:
     if(argv[1] == '--file' and os.path.isfile(argv[2])):
@@ -37,16 +38,44 @@ def gradientDescent(theta: pd.DataFrame, y_theta: pd.DataFrame,
                                 columns=theta.columns)
     theta_correction = pd.DataFrame(
         (0.01/len(y)) * gd_summatory.sum(axis='rows')).transpose()
-    
+
     theta_updated = theta - theta_correction
 
     return theta_updated
 
 
+def plotCostFunction(iteration: List[int], J: List[float], 
+                     filename: str) -> None:
+    plt.figure()
+    plt.plot(iteration, J)
+    plt.xlim([-10, max(iteration)])
+    plt.ylim([min(J)*0.95, max(J)*1.05])
+    plt.xlabel('Iteration')
+    plt.ylabel(r'$J(\theta) = \frac{1}{2m} \sum\limits^m_{i=1}'
+               r'\big(h_{\theta}(x^{(i)})-y^{(i)}\big)^2$')
+    plt.title('Cost function')
+    plt.savefig(filename + '.png', dpi=150)
+    plt.close()
+
+
+def plotLinearRegOneVar(data: pd.DataFrame, modelOutput: pd.DataFrame,
+                        filename: str) -> None:
+    plt.figure()
+    plt.scatter(data['x1'].values, data['y'].values, marker='+', color='red',
+                label='Training data')
+    plt.plot(data['x1'].values, modelOutput.values, label='Linear regression')
+    plt.xlabel('Population of city in 10,000s')
+    plt.ylabel(r'Profit in \$10,000s')
+    plt.title('Linear regression with one variable')
+    plt.legend(loc='best')
+    plt.savefig(filename + '.png', dpi=150)
+    plt.close()
+
+
 def header(argv: List[str]) -> pd.DataFrame:
     if not checkArgvOk(argv):
         sys.exit('ERROR - The arguments passed to "ex1.py" are incorrect. '
-              'Execution format:\n', 'python --file <filename>')
+                 'Execution format:\n', 'python --file <filename>')
 
     data = pd.read_csv(argv[2], sep=",", header=None)
     data.insert(loc=0, column='x0', value=1)
@@ -56,9 +85,9 @@ def header(argv: List[str]) -> pd.DataFrame:
 
 
 def body(data: pd.DataFrame) -> None:
-    theta = pd.DataFrame(data=np.zeros([1,len(data.columns)-1]),
+    theta = pd.DataFrame(data=np.zeros([1, len(data.columns)-1]),
                          columns=['t0', 't1'])
-    
+
     iteration = []
     J = []
     for i in range(1500):
@@ -69,26 +98,10 @@ def body(data: pd.DataFrame) -> None:
         iteration.append(i)
         J.append(cost)
 
-    plt.plot(iteration, J)
-    plt.xlim([-10,max(iteration)])
-    plt.ylim([min(J)*0.95,max(J)*1.05])
-    plt.xlabel('Iteration')
-    plt.ylabel(r'$J(\theta) = \frac{1}{2m} \sum\limits^m_{i=1}'
-               r'\big(h_{\theta}(x^{(i)})-y^{(i)}\big)^2$')
-    plt.title('Cost function')
-    plt.savefig('linearRegression1Variable_costFunction.png', dpi=150)
-    plt.show()
+    plotCostFunction(iteration, J, 'linearRegression1Variable_costFunction')
 
-    plt.figure()
-    plt.scatter(data['x1'].values, data['y'].values, marker='+', color='red',
-                label='Training data')
-    plt.plot(data['x1'].values, y_theta.values, label='Linear regression')
-    plt.xlabel('Population of city in 10,000s')
-    plt.ylabel(r'Profit in \$10,000s')
-    plt.title('Linear regression with one variable')
-    plt.legend(loc='best')
-    plt.savefig('linearRegression1Variable_result.png', dpi=150)
-    plt.show()
+    plotLinearRegOneVar(data, y_theta, 'linearRegression1Variable_result')
+
 
 if __name__ == "__main__":
     data = header(sys.argv)
