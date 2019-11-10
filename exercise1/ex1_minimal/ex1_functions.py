@@ -33,13 +33,24 @@ def checkArgvOk(argv: List[str]) -> bool:
     return argv_ok
 
 
+def featureNormalization(X: np.array) -> (np.array, np.array, np.array):
+    mean = np.mean(X, axis=0)
+    std = np.std(X, axis=0)
+    mean[0] = 0
+    std[0] = 1
+
+    Xn = (X - mean)/std
+    return Xn, mean, std
+
+
 def hypothesis(theta: np.array, X: np.array) -> np.array:
     y_theta = np.matmul(X, theta)
     return y_theta
 
 
 def costFunction(y_theta: np.array, y: np.array) -> float:
-    cost = np.sum(((y_theta - y)**2), axis=0) / (2*len(y))
+    # cost = np.sum(((y_theta - y)**2), axis=0) / (2*len(y))
+    cost = np.matmul((y_theta - y).transpose(), (y_theta - y)) / (2*len(y))
     return cost
 
 
@@ -52,7 +63,7 @@ def gradientDescent(alpha: float, theta: np.array, y_theta: np.array,
     return theta_updated
 
 
-def plotCostFunction(iteration: List[int], J: List[float],
+def plotCostFunction(iteration: List[int], J: List[float], alpha: float,
                      filename: str) -> None:
     plt.figure()
     plt.plot(iteration, J)
@@ -61,55 +72,21 @@ def plotCostFunction(iteration: List[int], J: List[float],
     plt.xlabel('Iteration')
     plt.ylabel(r'$J(\theta) = \frac{1}{2m} \sum\limits^m_{i=1}'
                r'\big(h_{\theta}(x^{(i)})-y^{(i)}\big)^2$')
-    plt.title('Cost function')
+    plt.suptitle('Cost function')
+    plt.title('Learning rate = ' + str(alpha))
     plt.savefig(filename + '.png', dpi=150)
     plt.close()
 
 
-def plotLinearRegOneVar(X: np.array, y: np.array, modelOutput: np.array,
-                        filename: str) -> None:
+def plotLinearRegOneVar(x: np.array, y: np.array, modelOutput: np.array,
+                        alpha: float, filename: str) -> None:
     plt.figure()
-    plt.scatter(X[:, 1], y, marker='+', color='red', label='Training data')
-    plt.plot(X[:, 1], modelOutput, label='Linear regression')
+    plt.scatter(x, y, marker='+', color='red', label='Training data')
+    plt.plot(x, modelOutput, label='Linear regression')
     plt.xlabel('Population of city in 10,000s')
     plt.ylabel(r'Profit in \$10,000s')
-    plt.title('Linear regression with one variable')
+    plt.suptitle('Linear regression with one variable')
+    plt.title('Learning rate = ' + str(alpha))
     plt.legend(loc='best')
     plt.savefig(filename + '.png', dpi=150)
     plt.close()
-
-
-def header(argv: List[str]) -> (float, np.array, np.array):
-    if not checkArgvOk(argv):
-        sys.exit('ERROR - The arguments passed to "ex1.py" are incorrect. '
-                 'Execution format:\n'
-                 'python --alpha <learningRate> --file <filename>')
-    alpha = float(argv[2])
-    data = np.loadtxt(argv[4], delimiter=",")
-    X = np.ones(data.shape)
-    X[:, 1:] = data[:, :-1]
-    y = data[:, -1]
-
-    return alpha, X, y
-
-
-def body(alpha: float, X: np.array, y: np.array) -> None:
-    theta = np.zeros(X.shape[1])
-
-    iteration = []
-    J = []
-    for i in range(1500):
-        y_theta = hypothesis(theta, X)
-        cost = costFunction(y_theta, y)
-        theta = gradientDescent(0.01, theta, y_theta, X, y)
-        iteration.append(i)
-        J.append(cost)
-
-    plotCostFunction(iteration, J, 'linearRegression1Variable_costFunction')
-
-    plotLinearRegOneVar(X, y, y_theta, 'linearRegression1Variable_result')
-
-
-if __name__ == "__main__":
-    alpha, X, y = header(sys.argv)
-    body(alpha, X, y)
