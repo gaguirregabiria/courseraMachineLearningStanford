@@ -1,8 +1,10 @@
 import sys
 import os.path
 from typing import List
-import pandas as pd
 import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -21,29 +23,6 @@ def checkArgvOk(argv: List[str]) -> bool:
     return argv_ok
 
 
-def hypothesis(theta: pd.DataFrame, x: pd.DataFrame) -> np.array:
-    y_theta = (x.multiply(theta.values, axis='columns')).sum(axis='columns')
-    y_theta = pd.DataFrame(y_theta, columns=['y'])
-    return y_theta
-
-
-def costFunction(y_theta: pd.DataFrame, y: pd.DataFrame) -> float:
-    cost = ((y_theta - y)**2).sum(axis='rows') / (2*len(y))
-    return cost.values[0]
-
-
-def gradientDescent(theta: pd.DataFrame, y_theta: pd.DataFrame,
-                    x: pd.DataFrame, y: pd.DataFrame) -> pd.DataFrame:
-    gd_summatory = pd.DataFrame(x.values*(y_theta - y).values,
-                                columns=theta.columns)
-    theta_correction = pd.DataFrame(
-        (0.01/len(y)) * gd_summatory.sum(axis='rows')).transpose()
-
-    theta_updated = theta - theta_correction
-
-    return theta_updated
-
-
 def plotCostFunction(iteration: List[int], J: List[float], 
                      filename: str) -> None:
     plt.figure()
@@ -58,12 +37,12 @@ def plotCostFunction(iteration: List[int], J: List[float],
     plt.close()
 
 
-def plotLinearRegOneVar(data: pd.DataFrame, modelOutput: pd.DataFrame,
-                        filename: str) -> None:
+def plotLinearRegOneVar(X: pd.DataFrame, y: pd.DataFrame,
+                        modelOutput: np.array, filename: str) -> None:
     plt.figure()
-    plt.scatter(data['x1'].values, data['y'].values, marker='+', color='red',
+    plt.scatter(X.values, y.values, marker='+', color='red',
                 label='Training data')
-    plt.plot(data['x1'].values, modelOutput.values, label='Linear regression')
+    plt.plot(X.values, modelOutput, label='Linear regression')
     plt.xlabel('Population of city in 10,000s')
     plt.ylabel(r'Profit in \$10,000s')
     plt.title('Linear regression with one variable')
@@ -78,29 +57,26 @@ def header(argv: List[str]) -> pd.DataFrame:
                  'Execution format:\n', 'python --file <filename>')
 
     data = pd.read_csv(argv[2], sep=",", header=None)
-    data.insert(loc=0, column='x0', value=1)
-    data.columns = ['x0', 'x1', 'y']
+    column_names = ['x'+str(i) for i in range(1, data.shape[1])]
+    column_names.append('y')
+    data.columns = column_names
 
     return data
 
 
 def body(data: pd.DataFrame) -> None:
-    theta = pd.DataFrame(data=np.zeros([1, len(data.columns)-1]),
-                         columns=['t0', 't1'])
+    X = data.filter(regex='^x', axis=1)
+    y = data['y']
 
-    iteration = []
-    J = []
-    for i in range(1500):
-        y_theta = hypothesis(theta, data.drop('y', axis=1))
-        cost = costFunction(y_theta, data[['y']])
-        theta = gradientDescent(theta, y_theta, data.drop('y', axis=1),
-                                data[['y']])
-        iteration.append(i)
-        J.append(cost)
+    stdScaler = StandardScaler()
+    stdScaler.fit(X)
+    Xn = stdScaler.transform(X)
+    linReg = LinearRegression(fit_intercept=True, normalize=False, copy_X=True)
+    linReg.fit(Xn, y)
+    print('R^2 score of the regression:', linReg.score(Xn, y))
+    y_prediction = linReg.predict(Xn)
 
-    plotCostFunction(iteration, J, 'linearRegression1Variable_costFunction')
-
-    plotLinearRegOneVar(data, y_theta, 'linearRegression1Variable_result')
+    plotLinearRegOneVar(X, y, y_prediction, 'linearRegression1Variable_result')
 
 
 if __name__ == "__main__":
