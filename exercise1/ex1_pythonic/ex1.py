@@ -1,57 +1,12 @@
 import sys
-import os.path
 from typing import List
-import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-
-mpl.rc('text', usetex=True)
-plt.rc('font', family='serif')
+from ex1_functions import checkArgvOk, plotLinearRegOneVar
 
 
-def checkArgvOk(argv: List[str]) -> bool:
-    if(argv[1] == '--file' and os.path.isfile(argv[2])):
-        argv_ok = True
-    elif not os.path.isfile(argv[2]):
-        sys.exit('ERROR - File ' + argv[2] + ' does not exist')
-    else:
-        argv_ok = False
-
-    return argv_ok
-
-
-def plotCostFunction(iteration: List[int], J: List[float], 
-                     filename: str) -> None:
-    plt.figure()
-    plt.plot(iteration, J)
-    plt.xlim([-10, max(iteration)])
-    plt.ylim([min(J)*0.95, max(J)*1.05])
-    plt.xlabel('Iteration')
-    plt.ylabel(r'$J(\theta) = \frac{1}{2m} \sum\limits^m_{i=1}'
-               r'\big(h_{\theta}(x^{(i)})-y^{(i)}\big)^2$')
-    plt.title('Cost function')
-    plt.savefig(filename + '.png', dpi=150)
-    plt.close()
-
-
-def plotLinearRegOneVar(X: pd.DataFrame, y: pd.DataFrame,
-                        modelOutput: np.array, filename: str) -> None:
-    plt.figure()
-    plt.scatter(X.values, y.values, marker='+', color='red',
-                label='Training data')
-    plt.plot(X.values, modelOutput, label='Linear regression')
-    plt.xlabel('Population of city in 10,000s')
-    plt.ylabel(r'Profit in \$10,000s')
-    plt.title('Linear regression with one variable')
-    plt.legend(loc='best')
-    plt.savefig(filename + '.png', dpi=150)
-    plt.close()
-
-
-def header(argv: List[str]) -> pd.DataFrame:
+def header(argv: List[str]) -> (pd.DataFrame, str):
     if not checkArgvOk(argv):
         sys.exit('ERROR - The arguments passed to "ex1.py" are incorrect. '
                  'Execution format:\n', 'python --file <filename>')
@@ -61,10 +16,10 @@ def header(argv: List[str]) -> pd.DataFrame:
     column_names.append('y')
     data.columns = column_names
 
-    return data
+    return (data, argv[2])
 
 
-def body(data: pd.DataFrame) -> None:
+def body(data: pd.DataFrame, data_file: str) -> None:
     X = data.filter(regex='^x', axis=1)
     y = data['y']
 
@@ -76,9 +31,16 @@ def body(data: pd.DataFrame) -> None:
     print('R^2 score of the regression:', linReg.score(Xn, y))
     y_prediction = linReg.predict(Xn)
 
-    plotLinearRegOneVar(X, y, y_prediction, 'linearRegression1Variable_result')
+    if 'ex1data1.txt' in file:
+        plotLinearRegOneVar(X, y, y_prediction,
+                            'linearRegression1Variable_result')
+    else:
+        house_data = stdScaler.transform([[1650, 3]])
+        house_price = linReg.predict(house_data)
+        print('The predicted price of a 1650 square feet house with 3',
+              'bedrooms is', '{:.2f}'.format(house_price[0]), 'USD')
 
 
 if __name__ == "__main__":
-    data = header(sys.argv)
-    body(data)
+    data, file = header(sys.argv)
+    body(data, file)
