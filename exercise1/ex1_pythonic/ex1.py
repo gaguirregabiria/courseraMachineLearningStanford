@@ -9,7 +9,7 @@ from ex1_functions import checkArgvOk, plotLinearRegOneVar
 def header(argv: List[str]) -> (pd.DataFrame, str):
     if not checkArgvOk(argv):
         sys.exit('ERROR - The arguments passed to "ex1.py" are incorrect. '
-                 'Execution format:\n', 'python --file <filename>')
+                 'Execution format:\n', 'python ex1.py --file <filename>')
 
     data = pd.read_csv(argv[2], sep=",", header=None)
     column_names = ['x'+str(i) for i in range(1, data.shape[1])]
