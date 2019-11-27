@@ -66,20 +66,21 @@ def checkCostFunction(X: np.array, y: np.array) -> None:
     theta = np.zeros(X.shape[1])
 
     Xn, mean, std = featureNormalization(X)
-    y_theta = hypothesis(theta, Xn)
-    cost = costFunction(y_theta, y)
+    cost = costFunction(theta, Xn, y)
 
     assert(round(cost, 3) == 0.693)
 
 
-def costFunction(y_theta: np.array, y: np.array) -> float:
+def costFunction(theta: np.array, X: np.array, y: np.array) -> float:
+    y_theta = hypothesis(theta, X)
     to_sum = -y*np.log(y_theta) - (1 - y)*np.log(1 - y_theta)
     cost = np.sum(to_sum) / len(y)
     return cost
 
 
-def gradientDescent(alpha: float, theta: np.array, y_theta: np.array,
-                    X: np.array, y: np.array) -> np.array:
+def gradientDescent(alpha: float, theta: np.array, X: np.array,
+                    y: np.array) -> np.array:
+    y_theta = hypothesis(theta, X)
     theta_correction = (alpha/len(y)) * np.matmul(X.transpose(), (y_theta - y))
 
     theta_updated = theta - theta_correction
