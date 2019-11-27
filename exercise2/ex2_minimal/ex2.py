@@ -15,7 +15,7 @@ opt_progress = []
 def callbackFunction(theta: np.array) -> None:
     global opt_iter
     global opt_progress
-    opt_progress.append([opt_iter, theta])
+    opt_progress.append([opt_iter, *theta])
     opt_iter += 1
 
 
@@ -72,7 +72,13 @@ def body(alpha: float, X: np.array, y: np.array, file: str) -> None:
     if not result.success:
         sys.exit("Optimization function wasn't able to minimize the cost "
                  "function")
-    print(opt_progress)
+
+    # Plot the cost function as it is optimized by optimize.minimize
+    opt_progress = np.asarray(opt_progress)
+    opt_cost = [costFunction(t, Xn, y) for t in opt_progress[:, 1:]]
+    plotCostFunction(opt_progress[:, 0], opt_cost, -1,
+                     'logisticRegression_data1CostFunction_optimization')
+
     # Check both results are similar to a (0.5% difference allowed)
     try:
         assert(all(abs(1-theta/result.x) < 0.005))

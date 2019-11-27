@@ -114,7 +114,7 @@ def plotCostFunction(iteration: List[int], J: List[float], alpha: float,
                      filename: str) -> None:
     plt.figure()
     plt.plot(iteration, J)
-    plt.xlim([-10, max(iteration)])
+    plt.xlim([0, max(iteration)])
     plt.ylim([min(J)*0.95, max(J)*1.05])
     plt.xlabel('Iteration')
     plt.ylabel(r'$J(\theta) = \frac{1}{m} \sum\limits^m_{i=1}'
