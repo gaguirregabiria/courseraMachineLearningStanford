@@ -134,7 +134,7 @@ def plotLogisticRegression(x: np.array, y: np.array, decissionGrid: np.array,
     if decissionGrid is not None:
         plt.contour(decissionGrid[0], decissionGrid[1], decissionGrid[2],
                     colors='blue', linewidths=0.8)
-        plt.title('Decission boundary at prediction = 0.5')
+        plt.title('Decision boundary at prediction = 0.5')
     plt.scatter(positive_x[:, 0], positive_x[:, 1], marker='+', color='black',
                 label='Admitted')
     plt.scatter(negative_x[:, 0], negative_x[:, 1], marker='o', color='yellow',

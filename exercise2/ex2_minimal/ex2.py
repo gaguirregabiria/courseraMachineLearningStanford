@@ -8,6 +8,17 @@ from ex2_functions import checkArgvOk, plotLogisticRegression, sigmoid,\
     calculateLogisticRegresionAreas
 
 
+opt_iter = 0
+opt_progress = []
+
+
+def callbackFunction(theta: np.array) -> None:
+    global opt_iter
+    global opt_progress
+    opt_progress.append([opt_iter, theta])
+    opt_iter += 1
+
+
 def header(argv: List[str]) -> (np.array, np.array, str):
     if not checkArgvOk(argv):
         sys.exit('ERROR - The arguments passed to "ex1.py" are incorrect. '
@@ -23,12 +34,16 @@ def header(argv: List[str]) -> (np.array, np.array, str):
 
 
 def body(alpha: float, X: np.array, y: np.array, file: str) -> None:
+    # Import global variables for optimization tracing
+    global opt_iter
+    global opt_progress
+
     # Initialize LogReg parameters (theta) to a vector of zeros
     theta = np.zeros(X.shape[1])
 
     # Visualize the data
     plotLogisticRegression(X[:, 1:], y, None,
-                           'logisticRegresion_data1Visualization')
+                           'logisticRegression_data1Visualization')
 
     # Check that Sigmoid and cost function are well implemented
     checkSigmoid()
@@ -52,11 +67,12 @@ def body(alpha: float, X: np.array, y: np.array, file: str) -> None:
                      str(alpha))
 
     # Obtain theta with scipy optimization function
-    result = minimize(costFunction, np.zeros(X.shape[1]), (Xn, y))
+    result = minimize(costFunction, np.zeros(X.shape[1]), (Xn, y),
+                      callback=callbackFunction)
     if not result.success:
         sys.exit("Optimization function wasn't able to minimize the cost "
                  "function")
-
+    print(opt_progress)
     # Check both results are similar to a (0.5% difference allowed)
     try:
         assert(all(abs(1-theta/result.x) < 0.005))
@@ -68,13 +84,13 @@ def body(alpha: float, X: np.array, y: np.array, file: str) -> None:
     student = np.array([([1, 45, 85]-mean)/std])
     assert(round(hypothesis(theta, student)[0], 3) == 0.776)
 
-    # Calculate and plot the decission boundary
+    # Calculate and plot the decision boundary
     decission_grid = calculateLogisticRegresionAreas(theta, X, mean, std)
     decission_grid[2][decission_grid[2] > 0.5] = 1
     decission_grid[2][decission_grid[2] <= 0.5] = 0
 
     plotLogisticRegression(X[:, 1:], y, decission_grid,
-                           'logisticRegresion_data1DecissionGrid')
+                           'logisticRegression_data1DecisionGrid')
 
 
 if __name__ == "__main__":
