@@ -56,10 +56,11 @@ def sigmoid(z: np.array) -> np.array:
 def checkSigmoid() -> None:
     assert(sigmoid(np.array([0])) == np.array([0.5]))
     good_result = np.array([1/(1 + np.exp(1)), 0.5, 1/(1 + np.exp(-1))])
-    assert(np.array_equal(sigmoid(np.array([-1,0,1])), good_result))
+    assert(np.array_equal(sigmoid(np.array([-1, 0, 1])), good_result))
     good_result = np.array([[1/(1 + np.exp(100)), 1/(1 + np.exp(500))],
                             [1/(1 + np.exp(-100)), 1/(1 + np.exp(-500))]])
-    assert(np.array_equal(sigmoid(np.array([[-100, -500], [100, 500]])),                               good_result))
+    assert(np.array_equal(sigmoid(np.array([[-100, -500], [100, 500]])),
+                          good_result))
 
 
 def checkCostFunction(X: np.array, y: np.array) -> None:
@@ -95,18 +96,19 @@ def calculateLogisticRegresionAreas(theta: np.array, X: np.array,
                     (max(X[:, 1]) - min(X[:, 1]))/1000)
     ex2 = np.arange(min(X[:, 2]), max(X[:, 2]),
                     (max(X[:, 2]) - min(X[:, 2]))/1000)
-    
+
     grid_ex1, grid_ex2 = np.meshgrid(ex1, ex2)
     grid_prediction = np.array(grid_ex1.shape)
     data = np.ones([grid_ex1.size, 3])
     data[:, 1] = grid_ex1.flatten()
-    data[:, 2] = grid_ex2.flatten() 
-    
+    data[:, 2] = grid_ex2.flatten()
+
     data = (data - mean)/std
     grid_prediction = hypothesis(theta, data)
     grid_prediction = grid_prediction.reshape(grid_ex1.shape)
 
     return [grid_ex1, grid_ex2, grid_prediction]
+
 
 def plotCostFunction(iteration: List[int], J: List[float], alpha: float,
                      filename: str) -> None:
