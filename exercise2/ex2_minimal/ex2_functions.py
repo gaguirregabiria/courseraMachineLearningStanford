@@ -43,6 +43,27 @@ def featureNormalization(X: np.array) -> (np.array, np.array, np.array):
     return Xn, mean, std
 
 
+def polynomialFeatures(order: int, X: np.array) -> np.array:
+    # The number of output n-order polynomial features for an imput vector of
+    # k features is = binomial(k + n, n) - 1. Where binomial(l, m) is the
+    # binomial coeficient "l over m".
+    # In the k features we exclude the intercept (X[:, 0] = 1)
+    n_samples, n_features = X.shape
+    n_features -= 1
+    binomial_coef_numerator = np.math.factorial(n_features + order)
+    binomial_coef_denominator = np.math.factorial(n_features) *\
+        np.math.factorial(order)
+    polynomial_features = binomial_coef_numerator / binomial_coef_denominator\
+        - 1
+    Xp = np.ones((n_samples, polynomial_features + 1))
+    pf_index = 1
+    for i in range(0, order + 1):
+        for j in range(i+1, order + 1):
+            Xp[:, pf_index] = X[:, 1]**i * X[:, 2]**(j-i)
+            pf_index += 1
+    return Xp
+
+
 def hypothesis(theta: np.array, X: np.array) -> np.array:
     y_theta = sigmoid(np.matmul(X, theta))
     return y_theta
@@ -127,7 +148,7 @@ def plotCostFunction(iteration: List[int], J: List[float], alpha: float,
 
 
 def plotLogisticRegression(x: np.array, y: np.array, decissionGrid: np.array,
-                           legend0: str, legend1: str, xlabel: str, 
+                           legend0: str, legend1: str, xlabel: str,
                            ylabel: str, filename: str) -> None:
     positive_x = x[y == 1, :]
     negative_x = x[y == 0, :]
