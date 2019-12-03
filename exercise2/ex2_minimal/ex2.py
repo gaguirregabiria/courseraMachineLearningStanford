@@ -42,9 +42,15 @@ def body(alpha: float, X: np.array, y: np.array, file: str) -> None:
     theta = np.zeros(X.shape[1])
 
     # Visualize the data
-    plotLogisticRegression(X[:, 1:], y, None,
-                           'logisticRegression_data1Visualization')
-
+    if('ex2data1.txt' in file):
+        plotLogisticRegression(X[:, 1:], y, None, 'Admitted', 'Not admitted',
+                               'Exam 1 score', 'Exam 2 score',
+                               'logisticRegression_data1Visualization')
+    elif('ex2data2.txt' in file):
+        plotLogisticRegression(X[:, 1:], y, None, 'y = 0', 'y = 1',
+                               'Microchip Test 1', 'Microchip Test 2',
+                               'logisticRegression_data2Visualization')
+    exit(1)
     # Check that Sigmoid and cost function are well implemented
     checkSigmoid()
     checkCostFunction(X, y)

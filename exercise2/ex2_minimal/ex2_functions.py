@@ -127,7 +127,8 @@ def plotCostFunction(iteration: List[int], J: List[float], alpha: float,
 
 
 def plotLogisticRegression(x: np.array, y: np.array, decissionGrid: np.array,
-                           filename: str) -> None:
+                           legend0: str, legend1: str, xlabel: str, 
+                           ylabel: str, filename: str) -> None:
     positive_x = x[y == 1, :]
     negative_x = x[y == 0, :]
     plt.figure()
@@ -136,15 +137,15 @@ def plotLogisticRegression(x: np.array, y: np.array, decissionGrid: np.array,
                     colors='blue', linewidths=0.8)
         plt.title('Decision boundary at prediction = 0.5')
     plt.scatter(positive_x[:, 0], positive_x[:, 1], marker='+', color='black',
-                label='Admitted')
+                label=legend1)
     plt.scatter(negative_x[:, 0], negative_x[:, 1], marker='o', color='yellow',
-                edgecolors='black', label='Not admitted')
+                edgecolors='black', label=legend0)
     plt.xlim([min(min(positive_x[:, 0]), min(negative_x[:, 0])),
               max(max(positive_x[:, 0]), max(negative_x[:, 0]))])
     plt.ylim([min(min(positive_x[:, 1]), min(negative_x[:, 1])),
               max(max(positive_x[:, 1]), max(negative_x[:, 1]))])
-    plt.xlabel('Exam 1 score')
-    plt.ylabel('Exam 2 score')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     plt.suptitle('Logistic regression')
     plt.legend(loc=1)
     plt.savefig(filename + '.png', dpi=150)
