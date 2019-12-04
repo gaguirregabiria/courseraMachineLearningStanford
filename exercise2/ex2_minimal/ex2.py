@@ -5,7 +5,7 @@ from scipy.optimize import minimize
 from ex2_functions import checkArgvOk, plotLogisticRegression, sigmoid,\
     checkSigmoid, hypothesis, costFunction, featureNormalization,\
     checkCostFunction, gradientDescent, plotCostFunction,\
-    calculateLogisticRegresionAreas
+    calculateLogisticRegresionAreas, polynomialFeatures
 
 
 opt_iter = 0
@@ -50,7 +50,9 @@ def body(alpha: float, X: np.array, y: np.array, file: str) -> None:
         plotLogisticRegression(X[:, 1:], y, None, 'y = 0', 'y = 1',
                                'Microchip Test 1', 'Microchip Test 2',
                                'logisticRegression_data2Visualization')
-    exit(1)
+        X_original = np.copy(X)
+        X = polynomialFeatures(6, X)
+
     # Check that Sigmoid and cost function are well implemented
     checkSigmoid()
     checkCostFunction(X, y)

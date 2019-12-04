@@ -43,6 +43,24 @@ def featureNormalization(X: np.array) -> (np.array, np.array, np.array):
     return Xn, mean, std
 
 
+def binomial(n, k):
+    """
+    A fast way to calculate binomial coefficients by Andrew Dalke.
+    See http://stackoverflow.com/questions/3025162/
+    statistics-combinations-in-python
+    """
+    if 0 <= k <= n:
+        ntok = 1
+        ktok = 1
+        for t in range(1, min(k, n - k) + 1):
+            ntok *= n
+            ktok *= t
+            n -= 1
+        return ntok // ktok
+    else:
+        return 0
+
+
 def polynomialFeatures(order: int, X: np.array) -> np.array:
     # The number of output n-order polynomial features for an imput vector of
     # k features is = binomial(k + n, n) - 1. Where binomial(l, m) is the
@@ -50,16 +68,13 @@ def polynomialFeatures(order: int, X: np.array) -> np.array:
     # In the k features we exclude the intercept (X[:, 0] = 1)
     n_samples, n_features = X.shape
     n_features -= 1
-    binomial_coef_numerator = np.math.factorial(n_features + order)
-    binomial_coef_denominator = np.math.factorial(n_features) *\
-        np.math.factorial(order)
-    polynomial_features = binomial_coef_numerator / binomial_coef_denominator\
-        - 1
-    Xp = np.ones((n_samples, polynomial_features + 1))
+    polynomial_features = binomial(n_features + order, order) - 1
+    Xp = np.ones((int(n_samples), int(polynomial_features + 1)))
+
     pf_index = 1
-    for i in range(0, order + 1):
-        for j in range(i+1, order + 1):
-            Xp[:, pf_index] = X[:, 1]**i * X[:, 2]**(j-i)
+    for i in range(1, order + 1):
+        for j in range(0, i + 1):
+            Xp[:, pf_index] = X[:, 1]**(i-j) * X[:, 2]**j
             pf_index += 1
     return Xp
 
